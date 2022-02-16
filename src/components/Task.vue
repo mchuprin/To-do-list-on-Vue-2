@@ -4,10 +4,10 @@
       <p>{{ index + 1 + "." }}</p>
       <template v-if="isEdit">
         <input
-            ref="input"
-            v-model="editValue"
-            @keypress.enter="editDecision('confirm')"
-            @keydown.escape="editDecision('cancel')"
+          v-auto-focus
+          v-model="editValue"
+          @keypress.enter="editDecision('confirm')"
+          @keydown.escape="editDecision('cancel')"
         />
       </template>
       <template v-else>
@@ -84,7 +84,7 @@ export default class Task extends Vue {
   startEdit(title: string) {
     this.isEdit = true;
     this.editValue = title;
-    setTimeout(() => (this.$refs?.input as any)?.focus());
+    // setTimeout(() => (this.$refs?.input as any)?.focus());
   }
 }
 </script>

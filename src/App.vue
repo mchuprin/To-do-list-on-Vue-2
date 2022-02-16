@@ -5,8 +5,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import ToDoList from '@/views/ToDoList.vue';
+import Autofocus from '@/directives/autofocus';
 
 @Component({
+  directives: {
+    Autofocus,
+  },
   components: {
     ToDoList,
   },
