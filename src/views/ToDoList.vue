@@ -3,8 +3,24 @@
     <div class="top-line">
       <h1 class="top-line__title">Список дел</h1>
       <div id="input" class="top-line__input-line">
-        <input v-model.trim="inputValue" @keypress.enter="addTask" v-auto-focus/>
-        <button :disabled="!inputValue" @click="addTask">Add</button>
+        <AppInput
+          placeholder="Введите задачу..."
+          @keypress.enter="addTask"
+          v-model="inputValue"
+        >
+          <template></template>
+          <template v-slot:prefix>
+            <i v-if="isNewTaskValid" class="fas fa-plus"></i>
+            <i v-else class="fas fa-ban"></i>
+          </template>
+          <template v-slot:postfix>
+            <p>{{ inputValue.length }}/50</p>
+          </template>
+          <template v-slot:hint v-if="!isNewTaskValid">
+            <p>Введите не более 50 символов</p>
+          </template>
+        </AppInput>
+        <button :disabled="!isNewTaskValid" @click="addTask">Add</button>
       </div>
     </div>
     <div class="added-tasks tasks tasks_added">
@@ -45,16 +61,22 @@
 import Component from 'vue-class-component';
 import Vue from 'vue';
 import Task from '@/components/Task.vue';
-import {TaskI} from '@/interfaces/task.interface';
+import { TaskI } from '@/interfaces/task.interface';
+import AppInput from '@/components/AppInput.vue';
 
 @Component({
   components: {
+    AppInput,
     Task,
   },
 })
 export default class Test extends Vue {
   tasks: TaskI[] = [];
   inputValue = '';
+
+  get isNewTaskValid(): boolean {
+    return this.inputValue.length <= 50 && !!this.inputValue.length;
+  }
 
   get toDoTasks(): TaskI[] {
     return this.tasks.filter((task) => !task.isChecked);
@@ -65,7 +87,7 @@ export default class Test extends Vue {
   }
 
   addTask(): void {
-    if (this.inputValue === '') {
+    if (!this.isNewTaskValid) {
       return;
     }
     this.tasks.push({
@@ -146,30 +168,19 @@ li {
   &__input-line {
     display: flex;
     flex-direction: row;
-
-    input {
-      box-sizing: border-box;
-      height: 35px;
-      width: 80%;
-      outline: none;
-      border: none;
-      padding: 0 10px;
-      color: white;
-      background: $input-back;
-    }
-
     button {
       background: $top-button;
       box-sizing: border-box;
+      height: 35px;
       width: 20%;
       font-size: 16px;
       color: white;
-
-      button:disabled {
-        cursor: not-allowed;
-      }
+    }
+    button:disabled {
+      cursor: not-allowed;
     }
   }
+
 }
 
 .tasks {
@@ -194,7 +205,6 @@ li {
   &_added {
     li {
       background: rgba(0, 0, 0, 0.58);
-
       button {
         color: white;
       }
@@ -205,10 +215,6 @@ li {
         background: rgba(255, 253, 253, 0.58);
         align-items: center;
         color: black;
-      }
-
-      button {
-        grid-column-start: 5;
       }
     }
   }

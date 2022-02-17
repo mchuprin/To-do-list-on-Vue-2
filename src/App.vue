@@ -6,6 +6,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import ToDoList from '@/views/ToDoList.vue';
 import Autofocus from '@/directives/autofocus';
+import AppInput from '@/components/AppInput.vue'
 
 @Component({
   directives: {
@@ -13,6 +14,7 @@ import Autofocus from '@/directives/autofocus';
   },
   components: {
     ToDoList,
+    AppInput,
   },
 })
 export default class App extends Vue {}
