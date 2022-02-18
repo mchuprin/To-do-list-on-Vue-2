@@ -4,9 +4,9 @@
       <h1 class="top-line__title">Список дел</h1>
       <div id="input" class="top-line__input-line">
         <AppInput
-            placeholder="Введите задачу..."
-            @keypress.enter="addTask"
-            v-model="inputValue"
+          placeholder="Введите задачу..."
+          @keypress.enter="addTask"
+          v-model="inputValue"
         >
           <template></template>
           <template v-slot:prefix>
@@ -23,19 +23,19 @@
         <button :disabled="!isNewTaskValid" @click="addTask">Add</button>
       </div>
     </div>
-    <div class="added-tasks tasks tasks_added">
+    <div class="tasks tasks_added">
       <h2>Need to do</h2>
-      <ul>
+      <transition-group name="order" tag="ul">
         <Task
-            v-for="(task, index) in toDoTasks"
-            :key="task.id"
-            :index="index"
-            :task="task"
-            @check-task="() => checked(task.id)"
-            @change-order="changeOrder"
-            @confirm-edit="(a) => confirmEdit(task.id, a)"
+          v-for="(task, index) in toDoTasks"
+          :key="task.id"
+          :index="index"
+          :task="task"
+          @check-task="() => checked(task.id)"
+          @change-order="changeOrder"
+          @confirm-edit="(a) => confirmEdit(task.id, a)"
         />
-      </ul>
+      </transition-group>
     </div>
     <div class="tasks tasks_completed">
       <div class="tasks__top-line">
@@ -44,24 +44,24 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <ul class="done-tasks__list">
+      <transition-group name="deleting" tag="ul">
         <Task
-            v-for="(oneTask, index) in doneTasks"
-            :key="oneTask.id"
-            :index="index"
-            :task="oneTask"
-            @remove-task="removeTask"
+          v-for="(oneTask, index) in doneTasks"
+          :key="oneTask.id"
+          :index="index"
+          :task="oneTask"
+          @remove-task="removeTask"
         />
-      </ul>
+      </transition-group>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component} from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import Vue from 'vue';
 import Task from '@/components/Task.vue';
-import {TaskI} from '@/interfaces/task.interface';
+import { TaskI } from '@/interfaces/task.interface';
 import AppInput from '@/components/AppInput.vue';
 
 @Component({
@@ -210,6 +210,7 @@ li {
     display: flex;
     flex-direction: column;
     padding: 10px 0 0 0;
+    width: 771px;
     gap: 5px;
   }
 
@@ -238,4 +239,23 @@ li {
     }
   }
 }
+transition-group {
+  width: 771px;
+}
+.deleting-leave-from {
+  background: $deleting-color;
+}
+.deleting-leave-to {
+  transform: translateX(50px);
+  background: $deleting-color;
+  opacity: 0;
+}
+.deleting-leave-active {
+  transition: opacity 1s ease, transform 1s ease;
+  //background: red;
+}
+.order-move {
+  transition: transform 1s;
+}
+
 </style>
