@@ -4,9 +4,9 @@
       <h1 class="top-line__title">Список дел</h1>
       <div id="input" class="top-line__input-line">
         <AppInput
-          placeholder="Введите задачу..."
-          @keypress.enter="addTask"
-          v-model="inputValue"
+            placeholder="Введите задачу..."
+            @keypress.enter="addTask"
+            v-model="inputValue"
         >
           <template></template>
           <template v-slot:prefix>
@@ -27,13 +27,13 @@
       <h2>Need to do</h2>
       <ul>
         <Task
-          v-for="(task, index) in toDoTasks"
-          :key="task.id"
-          :index="index"
-          :task="task"
-          @check-task="() => checked(task.id)"
-          @change-order="changeOrder"
-          @confirm-edit="(a) => confirmEdit(task.id, a)"
+            v-for="(task, index) in toDoTasks"
+            :key="task.id"
+            :index="index"
+            :task="task"
+            @check-task="() => checked(task.id)"
+            @change-order="changeOrder"
+            @confirm-edit="(a) => confirmEdit(task.id, a)"
         />
       </ul>
     </div>
@@ -46,11 +46,11 @@
       </div>
       <ul class="done-tasks__list">
         <Task
-          v-for="(oneTask, index) in doneTasks"
-          :key="oneTask.id"
-          :index="index"
-          :task="oneTask"
-          @remove-task="removeTask"
+            v-for="(oneTask, index) in doneTasks"
+            :key="oneTask.id"
+            :index="index"
+            :task="oneTask"
+            @remove-task="removeTask"
         />
       </ul>
     </div>
@@ -58,10 +58,10 @@
 </template>
 
 <script lang="ts">
-import Component from 'vue-class-component';
+import {Component} from 'vue-property-decorator';
 import Vue from 'vue';
 import Task from '@/components/Task.vue';
-import { TaskI } from '@/interfaces/task.interface';
+import {TaskI} from '@/interfaces/task.interface';
 import AppInput from '@/components/AppInput.vue';
 
 @Component({
@@ -74,12 +74,22 @@ export default class Test extends Vue {
   tasks: TaskI[] = [];
   inputValue = '';
 
+  get newTaskOrder(): number  {
+    if (!this.toDoTasks.length) {
+      return 0;
+    }
+    const ordering = this.toDoTasks.map(({ order }) => order);
+    return Math.max(...ordering) + 1;
+    // return this.toDoTasks
+    //   .reduce((max, { order }) => order > max ? order : max, -1) + 1;
+  }
+
   get isNewTaskValid(): boolean {
     return this.inputValue.length <= 50 && !!this.inputValue.length;
   }
 
   get toDoTasks(): TaskI[] {
-    return this.tasks.filter((task) => !task.isChecked);
+    return this.tasks.filter((task) => !task.isChecked).sort((a, b) => a.order - b.order);
   }
 
   get doneTasks(): TaskI[] {
@@ -94,6 +104,7 @@ export default class Test extends Vue {
       title: this.inputValue.trim(),
       id: Math.random(),
       isChecked: false,
+      order: this.newTaskOrder
     });
     this.inputValue = '';
   }
@@ -120,17 +131,22 @@ export default class Test extends Vue {
     this.tasks = this.tasks.filter((task) => !task.isChecked);
   }
 
-  changeOrder(index: number, type: 'up' | 'down'): void {
-    if (type === 'up') {
-      const to = index - 1;
-      const from = index;
-      this.tasks.splice(to, 0, this.tasks.splice(from, 1)[0]);
+  changeOrder(id: number, type: 'up' | 'down'): void {
+    const indexFrom = this.toDoTasks.findIndex(task => task.id === id);
+    const indexTo = indexFrom + (type === 'up' ? -1 : 1);
+
+    if (this.toDoTasks.length <= indexTo || indexTo < 0) {
+      return;
     }
-    if (type === 'down') {
-      const to = index + 1;
-      const from = index;
-      this.tasks.splice(to, 0, this.tasks.splice(from, 1)[0]);
-    }
+
+    const orderTo = this.toDoTasks[indexTo].order;
+
+    this.toDoTasks[indexTo].order = this.toDoTasks[indexFrom].order
+    this.toDoTasks.find(task => {
+      if (task.id === id) {
+        task.order = orderTo;
+      }
+    });
   }
 }
 </script>
@@ -168,6 +184,7 @@ li {
   &__input-line {
     display: flex;
     flex-direction: row;
+
     button {
       background: $top-button;
       box-sizing: border-box;
@@ -176,6 +193,7 @@ li {
       font-size: 16px;
       color: white;
     }
+
     button:disabled {
       cursor: not-allowed;
     }
@@ -205,6 +223,7 @@ li {
   &_added {
     li {
       background: rgba(0, 0, 0, 0.58);
+
       button {
         color: white;
       }

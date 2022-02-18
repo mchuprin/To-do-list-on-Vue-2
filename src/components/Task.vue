@@ -21,10 +21,10 @@
               <i class="fas fa-pencil-alt"></i>
             </button>
             <div class="task__arrows">
-              <button @click="changeOrder(index, 'up')">
+              <button @click="changeOrder(task.id, 'up')">
                 <i class="fas fa-arrow-up"></i>
               </button>
-              <button @click="changeOrder(index, 'down')">
+              <button @click="changeOrder(task.id, 'down')">
                 <i class="fas fa-arrow-down"></i>
               </button>
             </div>
@@ -65,8 +65,8 @@ export default class Task extends Vue {
     this.$emit('remove-task', this.task.id);
   }
 
-  changeOrder(index: number, type: string) {
-    this.$emit('change-order', index, type);
+  changeOrder(id: number, type: string) {
+    this.$emit('change-order', id, type);
   }
 
   editDecision(type: 'confirm' | 'cancel') {
