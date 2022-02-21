@@ -7,16 +7,16 @@
           placeholder="Введите задачу..."
           @keypress.enter="addTask"
           v-model="inputValue"
+          ref="appInput"
         >
-          <template></template>
           <template v-slot:prefix>
-            <i v-if="isNewTaskValid" class="fas fa-plus"></i>
+            <i v-if="!isHintOpen" class="fas fa-plus"></i>
             <i v-else class="fas fa-ban"></i>
           </template>
           <template v-slot:postfix>
             <p>{{ inputValue.length }}/50</p>
           </template>
-          <template v-slot:hint v-if="!isNewTaskValid">
+          <template v-slot:hint v-if="isHintOpen">
             <p>Введите не более 50 символов</p>
           </template>
         </AppInput>
@@ -80,12 +80,13 @@ export default class Test extends Vue {
     }
     const ordering = this.toDoTasks.map(({ order }) => order);
     return Math.max(...ordering) + 1;
-    // return this.toDoTasks
-    //   .reduce((max, { order }) => order > max ? order : max, -1) + 1;
   }
 
   get isNewTaskValid(): boolean {
     return this.inputValue.length <= 50 && !!this.inputValue.length;
+  }
+  get isHintOpen(): boolean {
+    return this.inputValue.length > 50;
   }
 
   get toDoTasks(): TaskI[] {
@@ -107,6 +108,8 @@ export default class Test extends Vue {
       order: this.newTaskOrder
     });
     this.inputValue = '';
+    console.log('this.$refs.appInput', this.$refs.appInput);
+    (this.$refs.appInput as any).focus();
   }
 
   checked(id: number): void {
@@ -184,7 +187,7 @@ li {
   &__input-line {
     display: flex;
     flex-direction: row;
-
+    min-height: 60px;
     button {
       background: $top-button;
       box-sizing: border-box;
@@ -198,7 +201,6 @@ li {
       cursor: not-allowed;
     }
   }
-
 }
 
 .tasks {
@@ -239,21 +241,27 @@ li {
     }
   }
 }
+
 transition-group {
   width: 771px;
 }
-.deleting-leave-from {
-  background: $deleting-color;
+
+.deleting {
+  &-leave {
+    &-from {
+      background: $deleting-color;
+    }
+    &-to {
+      transform: translateX(50px);
+      background: $deleting-color;
+      opacity: 0;
+    }
+    &-active {
+      transition: opacity 1s ease, transform 1s ease;
+    }
+  }
 }
-.deleting-leave-to {
-  transform: translateX(50px);
-  background: $deleting-color;
-  opacity: 0;
-}
-.deleting-leave-active {
-  transition: opacity 1s ease, transform 1s ease;
-  //background: red;
-}
+
 .order-move {
   transition: transform 1s;
 }

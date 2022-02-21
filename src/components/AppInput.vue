@@ -7,6 +7,7 @@
       @input="(event) => this.$emit('input', event.target.value)"
       :value="value"
       v-bind="$attrs"
+      ref="input"
     />
     <div class="input-line__icon">
       <slot name="prefix"></slot>
@@ -34,6 +35,10 @@ export default class AppInput extends Vue {
   get listeners() {
     const { input, ...rest } = this.$listeners;
     return rest;
+  }
+
+  focus() {
+    (this.$refs.input as HTMLElement)?.focus();
   }
 }
 </script>

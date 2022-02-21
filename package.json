@@ -14,7 +14,8 @@
     "@fortawesome/vue-fontawesome": "^2.0.6",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^9.1.2"
+    "vue-property-decorator": "^9.1.2",
+    "vue-router": "^4.0.12"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.18.0",
@@ -49,7 +50,13 @@
       "ecmaVersion": 2020
     },
     "rules": {
-      "quotes": [2, "single", { "avoidEscape": true }]
+      "quotes": [
+        2,
+        "single",
+        {
+          "avoidEscape": true
+        }
+      ]
     }
   },
   "browserslist": [
