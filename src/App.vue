@@ -1,10 +1,9 @@
 <template>
-  <ToDoList />
+  <router-view></router-view>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import ToDoList from '@/views/ToDoList.vue';
 import Autofocus from '@/directives/autofocus';
 import AppInput from '@/components/AppInput.vue'
 
@@ -13,7 +12,6 @@ import AppInput from '@/components/AppInput.vue'
     Autofocus,
   },
   components: {
-    ToDoList,
     AppInput,
   },
 })
