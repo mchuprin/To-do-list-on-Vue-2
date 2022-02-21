@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!task.isChecked" class="task task_active">
+    <div v-if="!task.isChecked" class="task task_active" :class="{task_selected: selected}">
       <p>{{ index + 1 + "." }}</p>
       <template v-if="isEdit">
         <input
@@ -17,14 +17,14 @@
             <button @click="checked">
               <i class="fas fa-check"></i>
             </button>
-            <button @click="startEdit(task.title)">
+            <button @click.stop="startEdit(task.title)">
               <i class="fas fa-pencil-alt"></i>
             </button>
             <div class="task__arrows">
-              <button @click="changeOrder(task.id, 'up')">
+              <button @click.stop="changeOrder(task.id, 'up')">
                 <i class="fas fa-arrow-up"></i>
               </button>
-              <button @click="changeOrder(task.id, 'down')">
+              <button @click.stop="changeOrder(task.id, 'down')">
                 <i class="fas fa-arrow-down"></i>
               </button>
             </div>
@@ -50,7 +50,7 @@ import { Component } from 'vue-property-decorator';
 import { TaskI } from '@/interfaces/task.interface';
 
 @Component({
-  props: ['task', 'index'],
+  props: ['task', 'index', 'selected'],
 })
 export default class Task extends Vue {
   task!: TaskI;
@@ -84,7 +84,6 @@ export default class Task extends Vue {
   startEdit(title: string) {
     this.isEdit = true;
     this.editValue = title;
-    // setTimeout(() => (this.$refs?.input as any)?.focus());
   }
 }
 </script>
@@ -107,6 +106,9 @@ button {
   padding: 5px 25px;
   height: 50px;
   gap: 5px;
+  &_selected {
+    outline: $selected-task solid 1px;
+  }
   &_active {
     background: $added-color;
     color: white;

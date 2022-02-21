@@ -26,15 +26,21 @@
     <div class="tasks tasks_added">
       <h2>Need to do</h2>
       <transition-group name="order" tag="ul">
-        <Task
+        <div
           v-for="(task, index) in toDoTasks"
+          @click="() => toggleTaskSelection(task.id)"
           :key="task.id"
-          :index="index"
-          :task="task"
-          @check-task="() => checked(task.id)"
-          @change-order="changeOrder"
-          @confirm-edit="(a) => confirmEdit(task.id, a)"
-        />
+        >
+          <Task
+            :index="index"
+            :task="task"
+            :selected="isTaskSelected(task.id)"
+            @check-task="() => checked(task.id)"
+            @change-order="changeOrder"
+            @confirm-edit="(a) => confirmEdit(task.id, a)"
+          />
+        </div>
+
       </transition-group>
     </div>
     <div class="tasks tasks_completed">
@@ -85,6 +91,7 @@ export default class Test extends Vue {
   get isNewTaskValid(): boolean {
     return this.inputValue.length <= 50 && !!this.inputValue.length;
   }
+
   get isHintOpen(): boolean {
     return this.inputValue.length > 50;
   }
@@ -95,6 +102,19 @@ export default class Test extends Vue {
 
   get doneTasks(): TaskI[] {
     return this.tasks.filter((task) => task.isChecked);
+  }
+
+  isTaskSelected(taskId:number): boolean {
+    const ids = (this.$route.query.id || []) as string[];
+    return (ids as string[]).includes(String(taskId));
+  }
+
+  toggleTaskSelection(taskId:number): void {
+    const ids = (this.$route.query.id || []) as string[];
+    const updatedIds = this.isTaskSelected(taskId)
+      ? ids.filter((id) => id !== String(taskId))
+      : [...ids, String(taskId)];
+    this.$router.push({ path:'/todos', query: { id: updatedIds } });
   }
 
   addTask(): void {
@@ -108,7 +128,6 @@ export default class Test extends Vue {
       order: this.newTaskOrder
     });
     this.inputValue = '';
-    console.log('this.$refs.appInput', this.$refs.appInput);
     (this.$refs.appInput as any).focus();
   }
 

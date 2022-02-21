@@ -3,12 +3,13 @@ import VueRouter from 'vue-router';
 
 const routes = [
   {
-    path: '/todos',
+    path: '/todos/:id?',
     component: ToDoList,
+    name: 'toDoList'
   },
   {
     path: '**',
-    redirect: '/todos'
+    redirect: '/todos/:id?'
   },
 ];
 
