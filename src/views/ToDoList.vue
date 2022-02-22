@@ -1,13 +1,14 @@
 <template id="task-list">
   <div class="body">
     <div class="top-line">
-      <h1 class="top-line__title">Список дел</h1>
+      <h1 class="top-line__title">To-do list</h1>
       <div id="input" class="top-line__input-line">
         <AppInput
-          placeholder="Введите задачу..."
+          placeholder="Enter your task..."
           @keypress.enter="addTask"
           v-model="inputValue"
           ref="appInput"
+          class="top-line__app-input"
         >
           <template v-slot:prefix>
             <i v-if="!isHintOpen" class="fas fa-plus"></i>
@@ -195,6 +196,7 @@ li {
   flex-direction: column;
   align-content: center;
   height: fit-content;
+  width: max-content;
   gap: 30px;
 }
 
@@ -202,10 +204,13 @@ li {
   &__title {
     padding-bottom: 10px;
   }
-
+  &__app-input {
+    flex-basis: 80%;
+  }
   &__input-line {
     display: flex;
     flex-direction: row;
+    width: 771px;
     min-height: 60px;
     button {
       background: $top-button;

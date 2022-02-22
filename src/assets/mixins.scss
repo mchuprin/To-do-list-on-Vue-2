@@ -1,7 +1,16 @@
 @mixin button () {
-  width: 30px;
   outline: none;
   border: none;
   background: none;
   cursor: pointer;
 }
+
+//@mixin nav-link () {
+//  position: absolute;
+//  //left: 10%;
+//  top: 3%;
+//  outline: none;
+//  border: none;
+//  background: none;
+//  cursor: pointer;
+//}

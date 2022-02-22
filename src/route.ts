@@ -1,5 +1,7 @@
 import ToDoList from '@/views/ToDoList.vue';
 import VueRouter from 'vue-router';
+import Login from '@/views/Login.vue'
+import Registration from '@/views/Registration.vue'
 
 const routes = [
   {
@@ -8,9 +10,19 @@ const routes = [
     name: 'toDoList'
   },
   {
-    path: '**',
-    redirect: '/todos/:id?'
+    path: '/login',
+    name: 'Login',
+    component: Login
   },
+  {
+    path: '/registration',
+    name: 'Registration',
+    component: Registration
+  },
+  // {
+  //   path: '**',
+  //   redirect: '/todos/:id?'
+  // },
 ];
 
 export default new VueRouter({
