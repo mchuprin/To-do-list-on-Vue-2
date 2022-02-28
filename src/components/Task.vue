@@ -1,11 +1,12 @@
 <template>
   <div>
-    <div v-if="!task.isChecked" class="task task_active" :class="{task_selected: selected}">
+    <v-card v-if="!task.isChecked" class="task task_active" :class="{task_selected: selected}">
       <p>{{ index + 1 + "." }}</p>
       <template v-if="isEdit">
-        <input
+        <v-text-field
           v-auto-focus
           v-model="editValue"
+          prepend-inner-icon="mdi-map-marker"
           @keypress.enter="editDecision('confirm')"
           @keydown.escape="editDecision('cancel')"
         />
@@ -13,8 +14,8 @@
       <template v-else>
         <div class="task__edit">
           <p>{{ task.title }}</p>
-          <div class="task__actions">
-            <button @click="checked">
+          <v-card-actions class="task__actions">
+            <button @click.stop="checked">
               <i class="fas fa-check"></i>
             </button>
             <button @click.stop="startEdit(task.title)">
@@ -28,11 +29,11 @@
                 <i class="fas fa-arrow-down"></i>
               </button>
             </div>
-          </div>
+          </v-card-actions>
         </div>
       </template>
-    </div>
-    <div v-else class="task task_completed">
+    </v-card>
+    <v-card v-else class="task task_completed">
       <div class="task__icon-text">
         <i class="fas fa-check"></i>
         <p>{{ task.title }}</p>
@@ -40,7 +41,7 @@
       <button @click="removeTask(task.id)">
         <i class="fas fa-trash-alt"></i>
       </button>
-    </div>
+    </v-card>
   </div>
 </template>
 

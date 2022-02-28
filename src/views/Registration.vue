@@ -78,6 +78,7 @@
 import AppInput from '@/components/AppInput.vue';
 import {Component, Vue} from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
+import axios from 'axios'
 
 @Component({
   directives: {
@@ -105,18 +106,17 @@ export default class Login extends Vue {
     this.repPassType = this.repPassType === 'text' ? 'password' : 'text'
   }
 
-  checkForm() {
-    
+  async checkForm  () {
     if (!this.username) {
       this.usernameError = 'Enter login';
-    } else if (this.username.length > 6) {
-      this.usernameError = 'Please enter up to 6 characters for login';
+    } else if (this.username.length > 10) {
+      this.usernameError = 'Please enter up to 10 characters for login';
     }
 
     if (!this.password) {
       this.passError = 'Enter password';
-    } else if (this.password.length > 6) {
-      this.passError = 'Please enter up to 6 characters for password';
+    } else if (this.password.length > 10) {
+      this.passError = 'Please enter up to 10 characters for password';
     }
 
     if (!this.repeatPass) {
@@ -124,6 +124,18 @@ export default class Login extends Vue {
     } else if (this.password !== this.repeatPass) {
       this.repPassError = 'Passwords mismatch'
     }
+    const response = await axios.post('http://localhost:8000/api/auth/registration',
+{
+      login: this.username,
+      password: this.password,
+    }).then( res => {
+      if (res.status === 200) {
+        this.$router.push('/login')
+      }
+    })
+    .catch(err => {
+      alert(err)
+    })
   }
 }
 </script>

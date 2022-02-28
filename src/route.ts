@@ -19,10 +19,6 @@ const routes = [
     name: 'Registration',
     component: Registration
   },
-  // {
-  //   path: '**',
-  //   redirect: '/todos/:id?'
-  // },
 ];
 
 export default new VueRouter({

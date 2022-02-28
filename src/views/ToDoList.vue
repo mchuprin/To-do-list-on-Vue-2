@@ -3,24 +3,32 @@
     <div class="top-line">
       <h1 class="top-line__title">To-do list</h1>
       <div id="input" class="top-line__input-line">
-        <AppInput
+<!--        <AppInput-->
+<!--          placeholder="Enter your task..."-->
+<!--          @keypress.enter="addTask"-->
+<!--          v-model="inputValue"-->
+<!--          ref="appInput"-->
+<!--          class="top-line__app-input"-->
+<!--        >-->
+        <v-text-field
+          label="solo"
           placeholder="Enter your task..."
           @keypress.enter="addTask"
           v-model="inputValue"
-          ref="appInput"
           class="top-line__app-input"
-        >
-          <template v-slot:prefix>
-            <i v-if="!isHintOpen" class="fas fa-plus"></i>
-            <i v-else class="fas fa-ban"></i>
-          </template>
-          <template v-slot:postfix>
-            <p>{{ inputValue.length }}/50</p>
-          </template>
-          <template v-slot:hint v-if="isHintOpen">
-            <p>Введите не более 50 символов</p>
-          </template>
-        </AppInput>
+          prepend-inner-icon="mdi-map-marker"
+        ></v-text-field>
+        <!--          <v-icon>email</v-icon>-->
+          <!--          <template v-slot:prefix>-->
+<!--            <i v-if="!isHintOpen" class="fas fa-plus"></i>-->
+<!--            <i v-else class="fas fa-ban"></i>-->
+<!--          </template>-->
+<!--          <template v-slot:postfix>-->
+<!--            <p>{{ inputValue.length }}/50</p>-->
+<!--          </template>-->
+<!--          <template v-slot:hint v-if="isHintOpen">-->
+<!--            <p>Введите не более 50 символов</p>-->
+<!--          </template>-->
         <button :disabled="!isNewTaskValid" @click="addTask">Add</button>
       </div>
     </div>

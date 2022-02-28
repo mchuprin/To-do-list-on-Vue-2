@@ -58,6 +58,7 @@
 import AppInput from '@/components/AppInput.vue';
 import {Component, Vue} from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
+import axios from 'axios';
 
 @Component({
   directives: {
@@ -78,21 +79,35 @@ export default class Login extends Vue {
     this.passType = this.passType === 'text' ? 'password' : 'text' ;
   }
 
-  checkForm() {
+  async checkForm() {
     this.usernameError = '';
     this.passError = '';
 
     if(!this.username) {
       this.usernameError = 'Enter login';
-    } else if (this.username.length > 6) {
-      this.usernameError = 'Please enter up to 6 characters for login';
+    } else if (this.username.length > 10) {
+      this.usernameError = 'Please enter up to 10 characters for login';
     }
 
     if(!this.password) {
       this.passError = 'Enter password';
-    } else if (this.password.length > 6) {
-      this.passError = 'Please enter up to 6 characters for password';
+    } else if (this.password.length > 10) {
+      this.passError = 'Please enter up to 10 characters for password';
     }
+    const response = await axios.post('http://localhost:8000/api/auth/login',
+    {
+        login: this.username,
+        password: this.password,
+      })
+      .then(res => {
+        if (res.status === 200) {
+          localStorage.setItem('token', res.data.token)
+          return this.$router.push('/todos')
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      });
   }
 }
 </script>
