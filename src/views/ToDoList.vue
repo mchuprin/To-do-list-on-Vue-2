@@ -3,33 +3,29 @@
     <div class="top-line">
       <h1 class="top-line__title">To-do list</h1>
       <div id="input" class="top-line__input-line">
-<!--        <AppInput-->
-<!--          placeholder="Enter your task..."-->
-<!--          @keypress.enter="addTask"-->
-<!--          v-model="inputValue"-->
-<!--          ref="appInput"-->
-<!--          class="top-line__app-input"-->
-<!--        >-->
         <v-text-field
-          label="solo"
-          placeholder="Enter your task..."
-          @keypress.enter="addTask"
+          class="rounded-0 "
+          dark
+          v-auto-focus
           v-model="inputValue"
-          class="top-line__app-input"
-          prepend-inner-icon="mdi-map-marker"
+          @keypress.enter="addTask"
+          solo
+          label="Enter your task..."
+          prepend-inner-icon="mdi-plus"
+          maxlength="50"
+          counter
+          color="white"
+          background-color="grey darken-3"
+          hint="Enter no more than 50 characters"
         ></v-text-field>
-        <!--          <v-icon>email</v-icon>-->
-          <!--          <template v-slot:prefix>-->
-<!--            <i v-if="!isHintOpen" class="fas fa-plus"></i>-->
-<!--            <i v-else class="fas fa-ban"></i>-->
-<!--          </template>-->
-<!--          <template v-slot:postfix>-->
-<!--            <p>{{ inputValue.length }}/50</p>-->
-<!--          </template>-->
-<!--          <template v-slot:hint v-if="isHintOpen">-->
-<!--            <p>Введите не более 50 символов</p>-->
-<!--          </template>-->
-        <button :disabled="!isNewTaskValid" @click="addTask">Add</button>
+        <v-btn
+          class="rounded-0"
+          :disabled="!isNewTaskValid"
+          @click="addTask"
+          height="48"
+          dark
+          color="rgba(238, 194, 58, 0.50)"
+        >Add</v-btn>
       </div>
     </div>
     <div class="tasks tasks_added">
@@ -49,7 +45,6 @@
             @confirm-edit="(a) => confirmEdit(task.id, a)"
           />
         </div>
-
       </transition-group>
     </div>
     <div class="tasks tasks_completed">
@@ -89,7 +84,7 @@ export default class Test extends Vue {
   tasks: TaskI[] = [];
   inputValue = '';
 
-  get newTaskOrder(): number  {
+  get newTaskOrder(): number {
     if (!this.toDoTasks.length) {
       return 0;
     }
@@ -106,24 +101,26 @@ export default class Test extends Vue {
   }
 
   get toDoTasks(): TaskI[] {
-    return this.tasks.filter((task) => !task.isChecked).sort((a, b) => a.order - b.order);
+    return this.tasks
+      .filter((task) => !task.isChecked)
+      .sort((a, b) => a.order - b.order);
   }
 
   get doneTasks(): TaskI[] {
     return this.tasks.filter((task) => task.isChecked);
   }
 
-  isTaskSelected(taskId:number): boolean {
+  isTaskSelected(taskId: number): boolean {
     const ids = (this.$route.query.id || []) as string[];
     return (ids as string[]).includes(String(taskId));
   }
 
-  toggleTaskSelection(taskId:number): void {
+  toggleTaskSelection(taskId: number): void {
     const ids = (this.$route.query.id || []) as string[];
     const updatedIds = this.isTaskSelected(taskId)
       ? ids.filter((id) => id !== String(taskId))
       : [...ids, String(taskId)];
-    this.$router.push({ path:'/todos', query: { id: updatedIds } });
+    this.$router.push({ path: '/todos', query: { id: updatedIds } });
   }
 
   addTask(): void {
@@ -134,7 +131,7 @@ export default class Test extends Vue {
       title: this.inputValue.trim(),
       id: Math.random(),
       isChecked: false,
-      order: this.newTaskOrder
+      order: this.newTaskOrder,
     });
     this.inputValue = '';
     (this.$refs.appInput as any).focus();
@@ -163,7 +160,7 @@ export default class Test extends Vue {
   }
 
   changeOrder(id: number, type: 'up' | 'down'): void {
-    const indexFrom = this.toDoTasks.findIndex(task => task.id === id);
+    const indexFrom = this.toDoTasks.findIndex((task) => task.id === id);
     const indexTo = indexFrom + (type === 'up' ? -1 : 1);
 
     if (this.toDoTasks.length <= indexTo || indexTo < 0) {
@@ -172,8 +169,8 @@ export default class Test extends Vue {
 
     const orderTo = this.toDoTasks[indexTo].order;
 
-    this.toDoTasks[indexTo].order = this.toDoTasks[indexFrom].order
-    this.toDoTasks.find(task => {
+    this.toDoTasks[indexTo].order = this.toDoTasks[indexFrom].order;
+    this.toDoTasks.find((task) => {
       if (task.id === id) {
         task.order = orderTo;
       }
@@ -212,8 +209,9 @@ li {
   &__title {
     padding-bottom: 10px;
   }
-  &__app-input {
-    flex-basis: 80%;
+  v-text-field {
+    border-radius: 0;
+    color: white;
   }
   &__input-line {
     display: flex;
@@ -223,7 +221,7 @@ li {
     button {
       background: $top-button;
       box-sizing: border-box;
-      height: 35px;
+      //height: 35px;
       width: 20%;
       font-size: 16px;
       color: white;
@@ -297,5 +295,4 @@ transition-group {
 .order-move {
   transition: transform 1s;
 }
-
 </style>

@@ -1,25 +1,44 @@
 <template>
-  <div class="background">
-    <header>
-      <div class="link-todos">
-        <router-link to="/todos">Todos</router-link>
-      </div>
-      <div class="log-reg">
-        <router-link to="/login">Login</router-link>
-        <router-link to="/registration">Registration</router-link>
-      </div>
-    </header>
-    <main>
-      <router-view></router-view>
-    </main>
-  </div>
+  <v-app>
+    <div class="background">
+      <header>
+        <v-card class="navigation">
+          <v-app-bar
+            color="#363636"
+            dark
+          >
+            <router-link to="/todos">
+              <v-btn>
+                <v-icon>mdi-format-list-numbered</v-icon>
+                To-do list
+              </v-btn>
+            </router-link>
+            <router-link to="/login">
+              <v-btn>
+                <v-icon>mdi-account-plus</v-icon>
+                Sign in
+              </v-btn>
+            </router-link>
+            <router-link to="/registration">
+              <v-btn>
+                <v-icon>mdi-login-variant</v-icon>
+                Registration
+              </v-btn>
+            </router-link>
+          </v-app-bar>
+        </v-card>
+      </header>
+      <main>
+        <router-view></router-view>
+      </main>
+    </div>
+  </v-app>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
-import AppInput from '@/components/AppInput.vue'
-
+import AppInput from '@/components/AppInput.vue';
 
 @Component({
   directives: {
@@ -29,18 +48,17 @@ import AppInput from '@/components/AppInput.vue'
     AppInput,
   },
 })
-export default class App extends Vue {
-}
+export default class App extends Vue {}
 </script>
 
 <style lang="scss">
 @import "src/assets/mixins";
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@300&display=swap");
 
 * {
   letter-spacing: 1px;
   margin: 0;
-  font-family: 'Merriweather', serif;
+  font-family: "Merriweather", serif;
 }
 
 .background {
@@ -65,9 +83,13 @@ header {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  width: 60%;
-  padding: 20px 0;
+  width: 100%;
+  .navigation {
+    position: absolute;
+    width: 100vw;
+  }
 }
+
 
 main {
   width: max-content;
@@ -123,6 +145,5 @@ main {
   a:focus:after {
     width: 100%;
   }
-
 }
 </style>

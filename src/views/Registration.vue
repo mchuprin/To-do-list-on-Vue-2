@@ -1,84 +1,61 @@
 <template>
   <div class="reg-form">
     <h2>Sign up</h2>
-    <form
-        class="reg-form__info"
-        id="login"
-        @submit.prevent="checkForm"
+    <v-form
+      ref="form"
+      lazy-validation
+      v-model="valid"
     >
-      <div>
-        <label class="reg-form__input-name">
-          Username
-        </label>
-        <AppInput
-            placeholder="Enter your username..."
-            v-model="username"
-            v-auto-focus
-        >
-          <template v-slot:hint>
-            <div class="reg-form__hint">
-              <p>{{ usernameError }}</p>
-            </div>
-          </template> 
-        </AppInput> 
-      </div>
-      <div>
-        <label class="reg-form__input-name">
-          Password
-        </label>
-        <AppInput
-          placeholder="Enter your password..."
-          v-model="password"
-          :type=passType
-        >
-          <template v-slot:postfix>
-            <i v-if="passType === 'password'" @click="togglePassType" class="fas fa-eye"></i>
-            <i v-else @click="togglePassType" class="fas fa-eye-slash"></i>
-          </template>
-          <template v-slot:hint>
-            <div class="reg-form__hint">
-              <p>{{ passError }}</p>
-            </div>
-          </template>
-        </AppInput>
-      </div>
-      <div>
-        <label class="reg-form__input-name">
-          Repeat password
-        </label>
-        <AppInput
-          placeholder="Repeat your password..."
-          v-model="repeatPass"
-          :type=repPassType
-        >
-          <template v-slot:postfix>
-            <i v-if="repPassType === 'password'" @click="toggleRepPassType" class="fas fa-eye"></i>
-            <i v-else @click="toggleRepPassType" class="fas fa-eye-slash"></i>
-          </template>
-          <template v-slot:hint>
-            <div class="reg-form__hint">
-              <p>{{ repPassError }}</p>
-            </div>
-          </template>
-        </AppInput>
-      </div>
-      <div>
-        <input
-            class="reg-form__submit"
-            type="submit"
-            value="Sign up"
-        >
-      </div>
-    </form>
-    <router-link to="/registration" class="reg-form__sign-up">Sign in</router-link>
-</div>
+      <v-text-field
+        label="Username"
+        v-model="username"
+        v-auto-focus
+        :counter="10"
+        :rules="usernameRules"
+        dark
+      ></v-text-field>
+      <v-text-field
+        label="Password"
+        v-model="password"
+        :type="passType"
+        :append-icon="passType === 'password' ? 'mdi-eye' : 'mdi-eye-off'"
+        @click:append="togglePassType"
+        dark
+        :counter="10"
+        :rules="passwordRules"
+      ></v-text-field>
+      <v-text-field
+        label="Repeat password"
+        v-model="repeatPass"
+        :type="repPassType"
+        :append-icon="repPassType === 'password' ? 'mdi-eye' : 'mdi-eye-off'"
+        @click:append="toggleRepPassType"
+        :error-messages="password !== repeatPass ? ['Passwords don\'t match.'] : []"
+        dark
+      ></v-text-field>
+      <v-btn
+        class="text-none"
+        tile
+        :disabled="!valid"
+        color="#eec23a"
+        dark
+        @click="validate"
+      >
+        Sign up
+      </v-btn>
+    </v-form>
+    <router-link to="/login" class="reg-form__sign-up">
+      Sign in
+    </router-link
+    >
+  </div>
 </template>
 
 <script lang="ts">
 import AppInput from '@/components/AppInput.vue';
-import {Component, Vue} from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
-import axios from 'axios'
+import axios from 'axios';
 
 @Component({
   directives: {
@@ -93,50 +70,75 @@ export default class Login extends Vue {
   password = '';
   repeatPass = '';
   passType: 'password' | 'text' = 'password';
-  repPassType: 'password' | 'text' = 'password'
-  usernameError = '';
-  passError = '';
-  repPassError = '';
+  repPassType: 'password' | 'text' = 'password';
+  valid = true;
+
+  usernameRules = [
+    (v: string): string | boolean => !!v || 'Username is required',
+    (v: string): string | boolean => (v && v.length <= 10) || 'Username must be less than 10 characters',
+  ]
+
+  passwordRules = [
+    (v: string): string | boolean => !!v || 'Password is required',
+    (v: string): string | boolean => (v && v.length <= 10) || 'Password must be less than 10 characters',
+  ]
 
   togglePassType() {
     this.passType = this.passType === 'text' ? 'password' : 'text';
   }
 
   toggleRepPassType() {
-    this.repPassType = this.repPassType === 'text' ? 'password' : 'text'
+    this.repPassType = this.repPassType === 'text' ? 'password' : 'text';
   }
 
-  async checkForm  () {
-    if (!this.username) {
-      this.usernameError = 'Enter login';
-    } else if (this.username.length > 10) {
-      this.usernameError = 'Please enter up to 10 characters for login';
-    }
-
-    if (!this.password) {
-      this.passError = 'Enter password';
-    } else if (this.password.length > 10) {
-      this.passError = 'Please enter up to 10 characters for password';
-    }
-
-    if (!this.repeatPass) {
-      this.repPassError = 'Please, repeat your password'
-    } else if (this.password !== this.repeatPass) {
-      this.repPassError = 'Passwords mismatch'
-    }
-    const response = await axios.post('http://localhost:8000/api/auth/registration',
-{
-      login: this.username,
-      password: this.password,
-    }).then( res => {
-      if (res.status === 200) {
-        this.$router.push('/login')
-      }
-    })
-    .catch(err => {
-      alert(err)
-    })
+  async validate() {
+    (this.$refs.form as any).validate();
+    await axios
+      .post('http://localhost:8000/api/auth/registration', {
+        login: this.username,
+        password: this.password,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          this.$router.push('/login');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
+  // async checkForm() {
+  //   if (!this.username) {
+  //     this.usernameError = 'Enter login';
+  //   } else if (this.username.length > 10) {
+  //     this.usernameError = 'Please enter up to 10 characters for login';
+  //   }
+  //
+  //   if (!this.password) {
+  //     this.passError = 'Enter password';
+  //   } else if (this.password.length > 10) {
+  //     this.passError = 'Please enter up to 10 characters for password';
+  //   }
+  //
+  //   if (!this.repeatPass) {
+  //     this.repPassError = 'Please, repeat your password';
+  //   } else if (this.password !== this.repeatPass) {
+  //     this.repPassError = 'Passwords mismatch';
+  //   }
+  //   const response = await axios
+  //     .post('http://localhost:8000/api/auth/registration', {
+  //       login: this.username,
+  //       password: this.password,
+  //     })
+  //     .then((res) => {
+  //       if (res.status === 200) {
+  //         this.$router.push('/login');
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       alert(err);
+  //     });
+  // }
 }
 </script>
 
@@ -151,7 +153,8 @@ export default class Login extends Vue {
   align-items: center;
   gap: 15px;
 
-  .fa-eye, .fa-eye-slash {
+  .fa-eye,
+  .fa-eye-slash {
     cursor: pointer;
   }
 

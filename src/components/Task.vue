@@ -1,46 +1,48 @@
 <template>
   <div>
-    <v-card v-if="!task.isChecked" class="task task_active" :class="{task_selected: selected}">
-      <p>{{ index + 1 + "." }}</p>
+    <v-card
+      v-if="!task.isChecked"
+      class="task task_active rounded-0"
+      :class="{ task_selected: selected }"
+      dark
+      color="#1e1e1e99"
+    >
+      <v-card-title>{{ index + 1 + "." }}</v-card-title>
       <template v-if="isEdit">
         <v-text-field
           v-auto-focus
           v-model="editValue"
-          prepend-inner-icon="mdi-map-marker"
           @keypress.enter="editDecision('confirm')"
           @keydown.escape="editDecision('cancel')"
         />
       </template>
       <template v-else>
         <div class="task__edit">
-          <p>{{ task.title }}</p>
+          <v-card-text>{{ task.title }}</v-card-text>
           <v-card-actions class="task__actions">
-            <button @click.stop="checked">
-              <i class="fas fa-check"></i>
-            </button>
-            <button @click.stop="startEdit(task.title)">
-              <i class="fas fa-pencil-alt"></i>
-            </button>
+            <v-icon @click.stop="checked">mdi-check</v-icon>
+            <v-icon @click.stop="startEdit(task.title)">mdi-pencil</v-icon>
             <div class="task__arrows">
-              <button @click.stop="changeOrder(task.id, 'up')">
-                <i class="fas fa-arrow-up"></i>
-              </button>
-              <button @click.stop="changeOrder(task.id, 'down')">
-                <i class="fas fa-arrow-down"></i>
-              </button>
+              <v-icon @click.stop="changeOrder(task.id, 'up')">mdi-chevron-up</v-icon>
+              <v-icon @click.stop="changeOrder(task.id, 'down')">mdi-chevron-down</v-icon>
             </div>
           </v-card-actions>
         </div>
       </template>
     </v-card>
-    <v-card v-else class="task task_completed">
-      <div class="task__icon-text">
-        <i class="fas fa-check"></i>
-        <p>{{ task.title }}</p>
-      </div>
-      <button @click="removeTask(task.id)">
-        <i class="fas fa-trash-alt"></i>
-      </button>
+    <v-card
+        v-else
+        class="task task_completed rounded-0"
+        color="#ffffff94"
+        light
+    >
+        <v-card-title >
+          <v-icon>mdi-check</v-icon>
+        </v-card-title>
+        <v-card-text
+          class="pa-4"
+        >{{ task.title }}</v-card-text>
+      <v-icon @click="removeTask(task.id)">mdi-delete</v-icon>
     </v-card>
   </div>
 </template>
@@ -98,46 +100,28 @@ button {
 }
 
 .task {
-  box-sizing: border-box;
+  //box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   width: 771px;
-  padding: 5px 25px;
+  padding: 5px 15px;
   height: 50px;
   gap: 5px;
+  p {
+    margin: 0;
+  }
   &_selected {
     outline: $selected-task solid 1px;
   }
   &_active {
     background: $added-color;
     color: white;
-    input {
-      background: $input-back;
-      border: none;
-      outline: none;
-      color: white;
-      padding: 7px 10px;
-      width: 670px;
-    }
-    button {
-      color: white;
-    }
   }
   &_completed {
     background: $done-color;
     color: black;
-    button {
-      display: flex;
-      justify-content: flex-end;
-      color: black;
-    }
-  }
-  &__icon-text {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
   }
   &__actions {
     display: flex;

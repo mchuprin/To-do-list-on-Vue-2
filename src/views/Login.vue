@@ -1,62 +1,49 @@
 <template>
   <div class="log-form">
     <h2>Sign in</h2>
-    <form
-      class="log-form__info"
-      id="login"
-      @submit.prevent="checkForm"
+    <v-form
+      ref="form"
+      lazy-validation
+      v-model="valid"
     >
-      <div>
-        <label class="log-form__input-name">
-          Username
-        </label>
-        <AppInput
-            placeholder="Enter your username..."
-            v-model="username"
-            v-auto-focus
-        >
-          <template v-slot:hint>
-            <div class="log-form__hint">
-              <p>{{ usernameError }}</p>
-            </div>
-          </template>
-        </AppInput>
-      </div>
-      <div>
-        <label class="log-form__input-name">
-          Password
-        </label>
-        <AppInput
-            placeholder="Enter your password..."
-            v-model="password"
-            :type=passType
-        >
-          <template v-slot:postfix >
-            <i v-if="passType === 'password'" @click="togglePassType" class="fas fa-eye"></i>
-            <i v-else @click="togglePassType" class="fas fa-eye-slash"></i>
-          </template>
-          <template v-slot:hint>
-            <div class="log-form__hint">
-              <p>{{ passError }}</p>
-            </div>
-          </template>
-        </AppInput>
-      </div>
-      <p>
-        <input
-            class="log-form__submit"
-            type="submit"
-            value="Sign in"
-        >
-      </p>
-    </form>
-    <router-link to="/registration" class="log-form__sign-up">Create account</router-link>
+      <v-text-field
+        label="Username"
+        v-model="username"
+        v-auto-focus
+        dark
+        :counter="10"
+        :rules="usernameRules"
+      ></v-text-field>
+      <v-text-field
+        label="Password"
+        v-model="password"
+        :type="passType"
+        :append-icon="passType === 'password' ? 'mdi-eye' : 'mdi-eye-off'"
+        :counter="10"
+        @click:append="togglePassType"
+        dark
+        :rules="passwordRules"
+      ></v-text-field>
+      <v-btn
+        class="text-none"
+        tile
+        :disabled="!valid"
+        color="#eec23a"
+        dark
+        @click="validate"
+      >
+        Sign in
+      </v-btn>
+    </v-form>
+    <router-link to="/registration" class="log-form__sign-up">
+      Create account
+    </router-link>
   </div>
 </template>
 
 <script lang="ts">
 import AppInput from '@/components/AppInput.vue';
-import {Component, Vue} from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
 import axios from 'axios';
 
@@ -72,41 +59,36 @@ export default class Login extends Vue {
   username = '';
   password = '';
   passType: 'password' | 'text' = 'password';
-  usernameError = '';
-  passError = '';
+  valid = false;
+
+  usernameRules = [
+    (v: any): string | boolean => !!v || 'Username is required',
+    (v: any): string | boolean => (v && v.length <= 10) || 'Username must be less than 10 characters',
+  ]
+
+  passwordRules = [
+    (v: any): string | boolean => !!v || 'Password is required',
+    (v: any): string | boolean => (v && v.length <= 10) || 'Password must be less than 10 characters',
+  ]
 
   togglePassType() {
-    this.passType = this.passType === 'text' ? 'password' : 'text' ;
+    this.passType = this.passType === 'text' ? 'password' : 'text';
   }
 
-  async checkForm() {
-    this.usernameError = '';
-    this.passError = '';
-
-    if(!this.username) {
-      this.usernameError = 'Enter login';
-    } else if (this.username.length > 10) {
-      this.usernameError = 'Please enter up to 10 characters for login';
-    }
-
-    if(!this.password) {
-      this.passError = 'Enter password';
-    } else if (this.password.length > 10) {
-      this.passError = 'Please enter up to 10 characters for password';
-    }
-    const response = await axios.post('http://localhost:8000/api/auth/login',
-    {
-        login: this.username,
-        password: this.password,
-      })
-      .then(res => {
+  async validate() {
+    (this.$refs.form as any).validate();
+    await axios.post('http://localhost:8000/api/auth/login', {
+      login: this.username,
+      password: this.password,
+    })
+      .then((res) => {
         if (res.status === 200) {
-          localStorage.setItem('token', res.data.token)
-          return this.$router.push('/todos')
+          localStorage.setItem('token', res.data.token);
+          return this.$router.push('/todos');
         }
       })
-      .catch(err => {
-        console.log(err)
+      .catch((err) => {
+        console.log(err);
       });
   }
 }
@@ -122,7 +104,8 @@ export default class Login extends Vue {
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  .fa-eye, .fa-eye-slash {
+  .fa-eye,
+  .fa-eye-slash {
     cursor: pointer;
   }
   &__hint {
@@ -148,10 +131,10 @@ export default class Login extends Vue {
     }
   }
   &__submit {
-     @include button;
-     background: #eec23a;
-     padding: 5px 20px;
-     font-size: 18px;
+    @include button;
+    background: #eec23a;
+    padding: 5px 20px;
+    font-size: 18px;
   }
   &__sign-up {
     text-decoration: none;

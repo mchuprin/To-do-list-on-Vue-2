@@ -65,7 +65,8 @@ button {
     color: white;
     background: $input-back;
   }
-  &__prefix, &__postfix {
+  &__prefix,
+  &__postfix {
     position: absolute;
   }
   &__prefix {
