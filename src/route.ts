@@ -1,27 +1,52 @@
-import ToDoList from '@/views/ToDoList.vue';
 import VueRouter from 'vue-router';
-import Login from '@/views/Login.vue';
-import Registration from '@/views/Registration.vue';
-
+import { authStore } from '@/store/store';
+function lazyLoad(view: string){
+  return() => import(`@/views/${view}.vue`)
+}
 const routes = [
   {
-    path: '/todos/:id?',
-    component: ToDoList,
-    name: 'toDoList',
+    path: '',
+    redirect: {
+      name: 'Login'
+    },
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: Login,
+    path: '/main',
+    component: lazyLoad('Main'),
+    meta: {requiresAuth: true},
+    children: [
+      { path: 'todos/:id?', component: lazyLoad('ToDoList'), name: 'ToDoList',},
+      { path: 'users', component: lazyLoad('Users'), name: 'Users',
+      },
+    ],
   },
   {
-    path: '/registration',
-    name: 'Registration',
-    component: Registration,
+    path: '/authorization',
+    component: lazyLoad('Authorization'),
+    children: [
+      { path: 'login', name: 'Login', component: lazyLoad('Login')},
+      { path: 'registration', name: 'Registration', component: lazyLoad('Registration')},]
   },
 ];
 
-export default new VueRouter({
+export const router = new VueRouter({
   routes,
   mode: 'history',
+});
+
+router.beforeEach(async(to,from,next)=>{
+  await authStore.initAuth()
+  if ( to.matched.some(record => record.meta.requiresAuth)) {
+    console.log('found auth', authStore.isAuth)
+    if(authStore.isAuth) {
+      console.log('authed')
+      return next();
+    } else {
+      console.log('not authed')
+      return next({name: 'Login'})
+    }
+  } else {
+    console.log('go ahead')
+    next();
+  }
 });

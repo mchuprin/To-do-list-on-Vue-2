@@ -1,6 +1,7 @@
 export interface TaskI {
   title: string;
-  id: number;
+  _id: string;
   isChecked: boolean;
   order: number;
+  userId: string;
 }

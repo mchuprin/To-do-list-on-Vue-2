@@ -10,8 +10,9 @@
       <v-card-title>{{ index + 1 + "." }}</v-card-title>
       <template v-if="isEdit">
         <v-text-field
-          v-auto-focus
+          ref="editInput"
           v-model="editValue"
+          @blur="editDecision('confirm')"
           @keypress.enter="editDecision('confirm')"
           @keydown.escape="editDecision('cancel')"
         />
@@ -23,25 +24,28 @@
             <v-icon @click.stop="checked">mdi-check</v-icon>
             <v-icon @click.stop="startEdit(task.title)">mdi-pencil</v-icon>
             <div class="task__arrows">
-              <v-icon @click.stop="changeOrder(task.id, 'up')">mdi-chevron-up</v-icon>
-              <v-icon @click.stop="changeOrder(task.id, 'down')">mdi-chevron-down</v-icon>
+              <v-icon @click.stop="changeOrder(task, 'up')"
+                >mdi-chevron-up</v-icon
+              >
+              <v-icon @click.stop="changeOrder(task, 'down')"
+                >mdi-chevron-down</v-icon
+              >
             </div>
           </v-card-actions>
         </div>
       </template>
     </v-card>
     <v-card
-        v-else
-        class="task task_completed rounded-0"
-        color="#ffffff94"
-        light
+      v-else
+      class="task task_completed rounded-0"
+      color="#ffffff94"
+      light
     >
-        <v-card-title >
-          <v-icon>mdi-check</v-icon>
-        </v-card-title>
-        <v-card-text
-          class="pa-4"
-        >{{ task.title }}</v-card-text>
+      <v-card-title>
+        <v-icon @click.stop="checked"
+        >mdi-check</v-icon>
+      </v-card-title>
+      <v-card-text class="pa-4">{{ task.title }}</v-card-text>
       <v-icon @click="removeTask(task.id)">mdi-delete</v-icon>
     </v-card>
   </div>
@@ -61,15 +65,15 @@ export default class Task extends Vue {
   isEdit = false;
 
   checked() {
-    this.$emit('check-task', this.task.id);
+    this.$emit('check-task', this.task._id);
   }
 
   removeTask() {
-    this.$emit('remove-task', this.task.id);
+    this.$emit('remove-task', this.task._id);
   }
 
-  changeOrder(id: number, type: string) {
-    this.$emit('change-order', id, type);
+  changeOrder(task: TaskI, type: string) {
+    this.$emit('change-order', task, type);
   }
 
   editDecision(type: 'confirm' | 'cancel') {
@@ -87,6 +91,7 @@ export default class Task extends Vue {
   startEdit(title: string) {
     this.isEdit = true;
     this.editValue = title;
+    setTimeout(() => (this.$refs.editInput as any).focus());
   }
 }
 </script>
@@ -95,12 +100,7 @@ export default class Task extends Vue {
 @import "src/assets/_colors.scss";
 @import "src/assets/mixins.scss";
 
-button {
-  @include button;
-}
-
 .task {
-  //box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: center;

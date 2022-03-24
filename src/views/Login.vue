@@ -1,11 +1,7 @@
 <template>
   <div class="log-form">
     <h2>Sign in</h2>
-    <v-form
-      ref="form"
-      lazy-validation
-      v-model="valid"
-    >
+    <v-form class="log-form__fields" ref="form" lazy-validation v-model="valid">
       <v-text-field
         label="Username"
         v-model="username"
@@ -15,6 +11,7 @@
         :rules="usernameRules"
       ></v-text-field>
       <v-text-field
+        class="log-form__password"
         label="Password"
         v-model="password"
         :type="passType"
@@ -42,34 +39,33 @@
 </template>
 
 <script lang="ts">
-import AppInput from '@/components/AppInput.vue';
 import { Component, Vue } from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
-import axios from 'axios';
+import { authStore } from '@/store/store';
 
 @Component({
   directives: {
     Autofocus,
   },
-  components: {
-    AppInput,
-  },
 })
 export default class Login extends Vue {
   username = '';
   password = '';
+  user = '';
   passType: 'password' | 'text' = 'password';
   valid = false;
 
   usernameRules = [
     (v: any): string | boolean => !!v || 'Username is required',
-    (v: any): string | boolean => (v && v.length <= 10) || 'Username must be less than 10 characters',
-  ]
+    (v: any): string | boolean =>
+      (v && v.length <= 10) || 'Username must be less than 10 characters',
+  ];
 
   passwordRules = [
     (v: any): string | boolean => !!v || 'Password is required',
-    (v: any): string | boolean => (v && v.length <= 10) || 'Password must be less than 10 characters',
-  ]
+    (v: any): string | boolean =>
+      (v && v.length <= 10) || 'Password must be less than 10 characters',
+  ];
 
   togglePassType() {
     this.passType = this.passType === 'text' ? 'password' : 'text';
@@ -77,19 +73,12 @@ export default class Login extends Vue {
 
   async validate() {
     (this.$refs.form as any).validate();
-    await axios.post('http://localhost:8000/api/auth/login', {
-      login: this.username,
-      password: this.password,
-    })
-      .then((res) => {
-        if (res.status === 200) {
-          localStorage.setItem('token', res.data.token);
-          return this.$router.push('/todos');
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      await authStore.login({username: this.username, password: this.password});
+      await this.$router.push({name: 'ToDoList'})
+    } catch (e) {
+      alert(e.response.data.msg);
+    }
   }
 }
 </script>
@@ -98,12 +87,19 @@ export default class Login extends Vue {
 @import "src/assets/mixins";
 
 .log-form {
+  margin-top: 60%;
   background: #3c3b387a;
   padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
+  .log-form__fields {
+    display: inline-grid;
+    .log-form__password {
+      padding-bottom: 20px;
+    }
+  }
   .fa-eye,
   .fa-eye-slash {
     cursor: pointer;

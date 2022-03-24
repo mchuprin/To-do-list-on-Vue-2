@@ -1,11 +1,7 @@
 <template>
   <div class="reg-form">
     <h2>Sign up</h2>
-    <v-form
-      ref="form"
-      lazy-validation
-      v-model="valid"
-    >
+    <v-form class="reg-form__fields" ref="form" lazy-validation v-model="valid">
       <v-text-field
         label="Username"
         v-model="username"
@@ -30,7 +26,9 @@
         :type="repPassType"
         :append-icon="repPassType === 'password' ? 'mdi-eye' : 'mdi-eye-off'"
         @click:append="toggleRepPassType"
-        :error-messages="password !== repeatPass ? ['Passwords don\'t match.'] : []"
+        :error-messages="
+          password !== repeatPass ? ['Passwords don\'t match.'] : []
+        "
         dark
       ></v-text-field>
       <v-btn
@@ -44,44 +42,40 @@
         Sign up
       </v-btn>
     </v-form>
-    <router-link to="/login" class="reg-form__sign-up">
-      Sign in
-    </router-link
-    >
+    <router-link to="/login" class="reg-form__sign-up"> Sign in </router-link>
   </div>
 </template>
 
 <script lang="ts">
-import AppInput from '@/components/AppInput.vue';
 import { Component, Vue } from 'vue-property-decorator';
 import Autofocus from '@/directives/autofocus';
-import axios from 'axios';
+import {authStore} from '@/store/store';
 
 @Component({
   directives: {
     Autofocus,
-  },
-  components: {
-    AppInput,
   },
 })
 export default class Login extends Vue {
   username = '';
   password = '';
   repeatPass = '';
+  user = '';
   passType: 'password' | 'text' = 'password';
   repPassType: 'password' | 'text' = 'password';
   valid = true;
 
   usernameRules = [
     (v: string): string | boolean => !!v || 'Username is required',
-    (v: string): string | boolean => (v && v.length <= 10) || 'Username must be less than 10 characters',
-  ]
+    (v: string): string | boolean =>
+      (v && v.length <= 10) || 'Username must be less than 10 characters',
+  ];
 
   passwordRules = [
     (v: string): string | boolean => !!v || 'Password is required',
-    (v: string): string | boolean => (v && v.length <= 10) || 'Password must be less than 10 characters',
-  ]
+    (v: string): string | boolean =>
+      (v && v.length <= 10) || 'Password must be less than 10 characters',
+  ];
 
   togglePassType() {
     this.passType = this.passType === 'text' ? 'password' : 'text';
@@ -93,52 +87,12 @@ export default class Login extends Vue {
 
   async validate() {
     (this.$refs.form as any).validate();
-    await axios
-      .post('http://localhost:8000/api/auth/registration', {
-        login: this.username,
-        password: this.password,
-      })
-      .then((res) => {
-        if (res.status === 200) {
-          this.$router.push('/login');
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    try {
+      await authStore.registration({username: this.username, password: this.password});
+    } catch (e) {
+      alert(e.response.data.msg);
+    }
   }
-  // async checkForm() {
-  //   if (!this.username) {
-  //     this.usernameError = 'Enter login';
-  //   } else if (this.username.length > 10) {
-  //     this.usernameError = 'Please enter up to 10 characters for login';
-  //   }
-  //
-  //   if (!this.password) {
-  //     this.passError = 'Enter password';
-  //   } else if (this.password.length > 10) {
-  //     this.passError = 'Please enter up to 10 characters for password';
-  //   }
-  //
-  //   if (!this.repeatPass) {
-  //     this.repPassError = 'Please, repeat your password';
-  //   } else if (this.password !== this.repeatPass) {
-  //     this.repPassError = 'Passwords mismatch';
-  //   }
-  //   const response = await axios
-  //     .post('http://localhost:8000/api/auth/registration', {
-  //       login: this.username,
-  //       password: this.password,
-  //     })
-  //     .then((res) => {
-  //       if (res.status === 200) {
-  //         this.$router.push('/login');
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       alert(err);
-  //     });
-  // }
 }
 </script>
 
@@ -146,13 +100,16 @@ export default class Login extends Vue {
 @import "src/assets/mixins";
 
 .reg-form {
+  margin-top: 60%;
   background: #3c3b387a;
   padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 15px;
-
+  .reg-form__fields {
+    display: inline-grid;
+  }
   .fa-eye,
   .fa-eye-slash {
     cursor: pointer;

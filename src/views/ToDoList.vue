@@ -4,12 +4,9 @@
       <h1 class="top-line__title">To-do list</h1>
       <div id="input" class="top-line__input-line">
         <v-text-field
-          class="rounded-0 "
-          dark
-          v-auto-focus
+          ref="topInput"
           v-model="inputValue"
           @keypress.enter="addTask"
-          solo
           label="Enter your task..."
           prepend-inner-icon="mdi-plus"
           maxlength="50"
@@ -17,6 +14,9 @@
           color="white"
           background-color="grey darken-3"
           hint="Enter no more than 50 characters"
+          class="rounded-0"
+          dark
+          solo
         ></v-text-field>
         <v-btn
           class="rounded-0"
@@ -25,71 +25,94 @@
           height="48"
           dark
           color="rgba(238, 194, 58, 0.50)"
-        >Add</v-btn>
-      </div>
-    </div>
-    <div class="tasks tasks_added">
-      <h2>Need to do</h2>
-      <transition-group name="order" tag="ul">
-        <div
-          v-for="(task, index) in toDoTasks"
-          @click="() => toggleTaskSelection(task.id)"
-          :key="task.id"
+          >Add</v-btn
         >
-          <Task
-            :index="index"
-            :task="task"
-            :selected="isTaskSelected(task.id)"
-            @check-task="() => checked(task.id)"
-            @change-order="changeOrder"
-            @confirm-edit="(a) => confirmEdit(task.id, a)"
-          />
-        </div>
-      </transition-group>
-    </div>
-    <div class="tasks tasks_completed">
-      <div class="tasks__top-line">
-        <h2 class="tasks__header">Done tasks</h2>
-        <button @click="removeTasks">
-          <i class="fas fa-times"></i>
-        </button>
       </div>
-      <transition-group name="deleting" tag="ul">
-        <Task
-          v-for="(oneTask, index) in doneTasks"
-          :key="oneTask.id"
-          :index="index"
-          :task="oneTask"
-          @remove-task="removeTask"
-        />
-      </transition-group>
+      <div v-if="inputLoading">
+        <v-progress-linear
+            indeterminate
+            color="#424242"
+        ></v-progress-linear>
+      </div>
     </div>
+    <div class="loading" v-if="isLoading">
+      <v-progress-circular
+        :width="2"
+        :size="70"
+        indeterminate
+        color="#424242"
+      ></v-progress-circular>
+    </div>
+    <div v-else>
+      <div class="tasks tasks_added">
+        <h2>Need to do</h2>
+        <transition-group name="order" tag="ul">
+          <div
+            v-for="(task, index) in toDoTasks"
+            @click="() => toggleTaskSelection(task._id)"
+            :key="task._id"
+          >
+            <Task
+              :index="index"
+              :task="task"
+              :selected="isTaskSelected(task._id)"
+              @check-task="() => checked(task._id, !task.isChecked)"
+              @change-order="changeOrder"
+              @confirm-edit="() => confirmEdit(task)"
+            />
+          </div>
+        </transition-group>
+      </div>
+      <div class="tasks tasks_completed">
+        <div class="tasks__top-line">
+          <h2 class="tasks__header">Done tasks</h2>
+          <button @click="removeTask(null)">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <transition-group name="deleting" tag="ul">
+          <Task
+            v-for="(oneTask, index) in doneTasks"
+            :key="oneTask._id"
+            :index="index"
+            :task="oneTask"
+            @check-task="() => checked(oneTask._id, !oneTask.isChecked)"
+            @remove-task="removeTask(oneTask._id)"
+          />
+        </transition-group>
+      </div>
+    </div>
+    <ErrorModal/>
   </div>
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator';
+import {Component, Watch} from 'vue-property-decorator';
 import Vue from 'vue';
 import Task from '@/components/Task.vue';
+import ErrorModal from '@/components/ErrorModal.vue';
 import { TaskI } from '@/interfaces/task.interface';
-import AppInput from '@/components/AppInput.vue';
+import { taskStore } from '@/store/store';
 
 @Component({
   components: {
-    AppInput,
+    ErrorModal,
     Task,
   },
 })
 export default class Test extends Vue {
-  tasks: TaskI[] = [];
   inputValue = '';
 
-  get newTaskOrder(): number {
-    if (!this.toDoTasks.length) {
-      return 0;
-    }
-    const ordering = this.toDoTasks.map(({ order }) => order);
-    return Math.max(...ordering) + 1;
+  created() {
+    taskStore.getTasks()
+  }
+
+  get userTasks() {
+    return taskStore.userTasks
+  }
+
+  get inputLoading() {
+    return taskStore.inLoading
   }
 
   get isNewTaskValid(): boolean {
@@ -100,22 +123,26 @@ export default class Test extends Vue {
     return this.inputValue.length > 50;
   }
 
-  get toDoTasks(): TaskI[] {
-    return this.tasks
-      .filter((task) => !task.isChecked)
-      .sort((a, b) => a.order - b.order);
+  get toDoTasks() {
+    return this.userTasks
+      .filter((task: TaskI) => !task.isChecked)
+      .sort((a: TaskI, b: TaskI) => a.order - b.order);
   }
 
   get doneTasks(): TaskI[] {
-    return this.tasks.filter((task) => task.isChecked);
+    return this.userTasks.filter((task: TaskI) => task.isChecked);
   }
 
-  isTaskSelected(taskId: number): boolean {
+  get isLoading() {
+    return taskStore.isLoading
+  }
+
+  isTaskSelected(taskId: string): boolean {
     const ids = (this.$route.query.id || []) as string[];
     return (ids as string[]).includes(String(taskId));
   }
 
-  toggleTaskSelection(taskId: number): void {
+  toggleTaskSelection(taskId: string): void {
     const ids = (this.$route.query.id || []) as string[];
     const updatedIds = this.isTaskSelected(taskId)
       ? ids.filter((id) => id !== String(taskId))
@@ -123,55 +150,45 @@ export default class Test extends Vue {
     this.$router.push({ path: '/todos', query: { id: updatedIds } });
   }
 
-  addTask(): void {
+  async addTask() {
     if (!this.isNewTaskValid) {
       return;
     }
-    this.tasks.push({
-      title: this.inputValue.trim(),
-      id: Math.random(),
-      isChecked: false,
-      order: this.newTaskOrder,
-    });
-    this.inputValue = '';
-    (this.$refs.appInput as any).focus();
-  }
-
-  checked(id: number): void {
-    const task = this.tasks.find((task) => task.id === id);
-    if (task) {
-      task.isChecked = true;
+    taskStore.setInputLoading(true)
+    try {
+      await taskStore.addTask(this.inputValue);
+      this.inputValue = '';
+      (this.$refs.topInput as any).focus();
+    } finally {
+      taskStore.setInputLoading(false)
     }
   }
 
-  confirmEdit(id: number, title: string): void {
-    const task = this.tasks.find((task) => task.id === id);
-    if (task) {
-      task.title = title;
-    }
+  async checked(_id: string, isChecked: boolean) {
+    await taskStore.solveTask({_id, isChecked});
   }
 
-  removeTask(id: number): void {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
+  async confirmEdit(task: any) {
+    const taskInfo = {_id: task._id, title: task.title}
+    await taskStore.confirmEdit(taskInfo);
   }
 
-  removeTasks(): void {
-    this.tasks = this.tasks.filter((task) => !task.isChecked);
+  async removeTask(id: string | null) {
+    await taskStore.deleteTask(id)
   }
 
-  changeOrder(id: number, type: 'up' | 'down'): void {
-    const indexFrom = this.toDoTasks.findIndex((task) => task.id === id);
-    const indexTo = indexFrom + (type === 'up' ? -1 : 1);
-
+  async changeOrder(taskFrom: TaskI, direction: 'up' | 'down') {
+    const indexFrom = this.toDoTasks.findIndex((task) => task._id === taskFrom._id);
+    const indexTo = indexFrom + (direction === 'up' ? -1 : 1);
+    const taskTo: any = this.toDoTasks.find((task, index) => index === indexTo)
+    await taskStore.changeOrder({taskFromId: taskFrom._id, taskToId: taskTo._id})
     if (this.toDoTasks.length <= indexTo || indexTo < 0) {
       return;
     }
-
     const orderTo = this.toDoTasks[indexTo].order;
-
     this.toDoTasks[indexTo].order = this.toDoTasks[indexFrom].order;
-    this.toDoTasks.find((task) => {
-      if (task.id === id) {
+    this.toDoTasks.find(task => {
+      if (task._id === taskFrom._id) {
         task.order = orderTo;
       }
     });
@@ -199,7 +216,9 @@ li {
 .body {
   display: flex;
   flex-direction: column;
-  align-content: center;
+  justify-content: center;
+  margin-top: 20%;
+  align-items: center;
   height: fit-content;
   width: max-content;
   gap: 30px;
@@ -221,7 +240,6 @@ li {
     button {
       background: $top-button;
       box-sizing: border-box;
-      //height: 35px;
       width: 20%;
       font-size: 16px;
       color: white;
@@ -233,6 +251,10 @@ li {
   }
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+}
 .tasks {
   display: flex;
   flex-direction: column;
@@ -252,7 +274,6 @@ li {
     justify-content: space-between;
     width: 771px;
   }
-
   &_added {
     li {
       background: rgba(0, 0, 0, 0.58);

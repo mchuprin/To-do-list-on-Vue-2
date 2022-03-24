@@ -6,9 +6,10 @@
 
 <script lang="ts">
 export default {
-  name: 'Authorization',
+  name: 'Main',
 }
 
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+</style>

@@ -2,31 +2,63 @@
   <v-app>
     <div class="background">
       <header>
-        <v-card class="navigation">
-          <v-app-bar
-            color="#363636"
-            dark
-          >
-            <router-link to="/todos">
-              <v-btn>
+        <v-app-bar color="#363636" dark tile class="navigation">
+          <div v-if="isAuth" class="navigation__todos">
+            <router-link class="navigation__nav mr-3" to="/main/todos">
+              <v-btn class="text-none">
                 <v-icon>mdi-format-list-numbered</v-icon>
                 To-do list
               </v-btn>
             </router-link>
-            <router-link to="/login">
-              <v-btn>
+            <router-link class="navigation__nav" to="/main/users">
+              <v-btn class="text-none">
+                <v-icon>mdi-account-box-multiple</v-icon>
+                Users
+              </v-btn>
+            </router-link>
+            <v-spacer></v-spacer>
+            <v-menu
+                offset-y
+                :rounded="'0'">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  dark
+                  icon
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <Avatar
+                      :user="user"
+                  />
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-title>Profile</v-list-item-title>
+                </v-list-item>
+                <router-link class="navigation__nav text-none" to="/authorization/login">
+                  <v-list-item @click="logout()"  class="navigation__nav">
+                    <v-list-item-title>Logout</v-list-item-title>
+                  </v-list-item>
+                </router-link>
+              </v-list>
+            </v-menu>
+          </div>
+          <div v-else>
+            <router-link class="navigation__nav" to="/authorization/login">
+              <v-btn class="navigation__nav">
                 <v-icon>mdi-account-plus</v-icon>
                 Sign in
               </v-btn>
             </router-link>
-            <router-link to="/registration">
-              <v-btn>
+            <router-link class="navigation__nav ml-8" to="/authorization/registration">
+              <v-btn class="text-none">
                 <v-icon>mdi-login-variant</v-icon>
                 Registration
               </v-btn>
             </router-link>
-          </v-app-bar>
-        </v-card>
+          </div>
+        </v-app-bar>
       </header>
       <main>
         <router-view></router-view>
@@ -34,21 +66,34 @@
     </div>
   </v-app>
 </template>
-
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import Autofocus from '@/directives/autofocus';
-import AppInput from '@/components/AppInput.vue';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { authStore } from '@/store/store';
+import Avatar from '@/components/Avatar.vue';
 
 @Component({
-  directives: {
-    Autofocus,
-  },
   components: {
-    AppInput,
+    Avatar,
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+  get isAuth() {
+    return authStore.isAuth;
+  }
+
+  get user() {
+    return authStore.loggedUser;
+  }
+
+  logout() {
+    authStore.logout();
+  }
+
+  async created() {
+    await authStore.initAuth();
+  }
+}
 </script>
 
 <style lang="scss">
@@ -86,15 +131,18 @@ header {
   width: 100%;
   .navigation {
     position: absolute;
-    width: 100vw;
+    width: 100%;
+    &__todos{
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+    &__nav {
+      text-decoration: none;
+    }
   }
-}
-
-
-main {
-  width: max-content;
-  flex: 1;
-  margin-top: 10%;
 }
 
 .link-todos {
