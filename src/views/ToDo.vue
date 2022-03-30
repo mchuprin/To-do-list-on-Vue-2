@@ -89,8 +89,8 @@
 <script lang="ts">
 import {Component, Watch} from 'vue-property-decorator';
 import Vue from 'vue';
-import Task from '@/components/Task.vue';
-import ErrorModal from '@/components/ErrorModal.vue';
+import Task from '@/components/todo/ToDoTask.vue';
+import ErrorModal from '@/components/common/AppErrorModal.vue';
 import { TaskI } from '@/interfaces/task.interface';
 import { taskStore } from '@/store/store';
 

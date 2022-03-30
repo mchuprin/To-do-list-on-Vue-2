@@ -75,7 +75,7 @@ export default class Login extends Vue {
     (this.$refs.form as any).validate();
     try {
       await authStore.login({username: this.username, password: this.password});
-      await this.$router.push({name: 'ToDoList'})
+      await this.$router.push({name: 'ToDo'})
     } catch (e) {
       alert(e.response.data.msg);
     }

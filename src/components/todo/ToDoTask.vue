@@ -97,8 +97,8 @@ export default class Task extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "src/assets/_colors.scss";
-@import "src/assets/mixins.scss";
+@import "src/assets/colors";
+@import "src/assets/mixins";
 
 .task {
   display: flex;

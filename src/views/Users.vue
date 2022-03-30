@@ -51,12 +51,12 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import {taskStore, usersStore} from '@/store/store';
-import User from '@/components/User.vue';
+import User from '@/components/users/UsersOne.vue';
 
 @Component({
   components: {
-    User
-  }
+    User,
+  },
 })
 export default class Users extends Vue {
   inputValue = '';
@@ -64,11 +64,11 @@ export default class Users extends Vue {
   isButtonDisabled = false;
 
   get currentPage() {
-    return usersStore.actualPage
+    return usersStore.actualPage;
   }
 
   get isNextPage() {
-    return usersStore.nextPage
+    return usersStore.nextPage;
   }
 
   get users() {
@@ -100,4 +100,5 @@ body {
   margin-top: 15%;
   width: 1000px;
 }
+
 </style>
